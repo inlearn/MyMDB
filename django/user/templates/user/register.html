@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    <h2>注册帐户</h2>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% include 'form.html' %}
+
+        <button type="submit" class="btn btn-primary">register</button>
+    </form>
+ <div class=" text-muted text-center">
+          Already have an account? <a href="{% url 'user:login' %}">Log in</a>
+ </div>
+{% endblock %}
