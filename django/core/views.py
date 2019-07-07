@@ -11,6 +11,8 @@ from django.views.generic import CreateView
 from django.core.exceptions import PermissionDenied
 from django.views.generic import UpdateView
 
+from core.forms import MovieImageForm
+
 
 class MovieList(ListView):
     paginate_by = 10  # 分页，一页20个
@@ -25,8 +27,13 @@ class PersonList(ListView):
 class MovieDetail(DetailView):
     queryset = Movie.objects.all_with_related_persons_and_score()
 
+    def movie_image_form(self):
+        if self.request.user.is_authenticated:
+            return MovieImageForm()
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx['image_form'] = self.movie_image_form()
         if self.request.user.is_authenticated:
             #  这边看
             vote = Vote.objects.get_vote_or_unsaved_blank_vote(
@@ -95,3 +102,24 @@ class UpdateVote(LoginRequiredMixin, UpdateView):
         movie_id = context['object'].id
         movie_detail_url = reverse('core:MovieDetail', kwargs={'pk': movie_id})
         return redirect(to=movie_detail_url)
+
+
+class MovieImageUpload(LoginRequiredMixin, CreateView):
+    form_class = MovieImageForm
+
+    #  初始化表格
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user.id
+        initial['movie'] = self.kwargs['movie_id']
+        return initial
+
+    def render_to_response(self, context, **response_kwargs):
+        movie_id = self.kwargs['movie_id']
+        movie_detail_url = reverse('core:MovieDetail', kwargs={'pk': movie_id})
+        return redirect(to=movie_detail_url)
+
+    def get_success_url(self):
+        movie_id = self.kwargs['movie_id']
+        movie_detail_url = reverse('core:MovieDetail', kwargs={'pk': movie_id})
+        return movie_detail_url

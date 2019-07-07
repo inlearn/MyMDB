@@ -5,3 +5,4 @@ env/
 .idea
 #SQLite database files
 *.sqlite3
+migrations/

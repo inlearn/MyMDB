@@ -17,9 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 import core.urls
 import user.urls
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+MEDIA_FILE_PATHS=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(core.urls, namespace='core')),
     path('user/',include(user.urls,namespace='user')),
     path('captcha/', include('captcha.urls')),
-]
+] + MEDIA_FILE_PATHS
